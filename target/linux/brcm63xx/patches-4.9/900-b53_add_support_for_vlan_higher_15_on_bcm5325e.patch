@@ -1,0 +1,83 @@
+--- a/drivers/net/phy/b53/b53_common.c
++++ b/drivers/net/phy/b53/b53_common.c
+@@ -202,7 +202,9 @@ static void b53_set_vlan_entry(struct b53_device *dev, u16 vid, u16 members,
+ 			if (dev->core_rev >= 3)
+ 				entry |= VA_VALID_25_R4 | vid << VA_VID_HIGH_S;
+ 			else
+-				entry |= VA_VALID_25;
++				// Upper 8 bits must be written in Write Register as well in order to take effect
++				// in VLAN Table, contrary to the doc that instructed only VLAN Table to write.
++				entry |= VA_VALID_25 | (vid >> 4) << VA_VID_HIGH_S;
+ 		}
+ 
+ 		b53_write32(dev, B53_VLAN_PAGE, B53_VLAN_WRITE_25, entry);
+@@ -423,13 +425,16 @@ static void b53_enable_mib(struct b53_device *dev)
+ 	b53_write8(dev, B53_MGMT_PAGE, B53_GLOBAL_CONFIG, gc);
+ }
+ 
++#define BCM5325_ACTUAL_VLAN_SIZE 16
++
+ static int b53_apply(struct b53_device *dev)
+ {
+ 	int i;
+ 
+ 	/* clear all vlan entries */
+ 	if (is5325(dev) || is5365(dev)) {
+-		for (i = 1; i < dev->sw_dev.vlans; i++)
++		unsigned int vlans = is5325(dev) ? BCM5325_ACTUAL_VLAN_SIZE : dev->sw_dev.vlans;
++		for (i = 1; i < vlans; i++)
+ 			b53_set_vlan_entry(dev, i, 0, 0);
+ 	} else {
+ 		b53_do_vlan_op(dev, VTA_CMD_CLEAR);
+@@ -439,6 +444,30 @@ static int b53_apply(struct b53_device *dev)
+ 
+ 	/* fill VLAN table */
+ 	if (dev->enable_vlan) {
++		if (is5325(dev)) {
++			unsigned int vlans_low_4[BCM5325_ACTUAL_VLAN_SIZE] = {};
++			int actual_vlans = 0;
++			
++			for (i = 0; i < dev->sw_dev.vlans; i++) {
++				struct b53_vlan *vlan = &dev->vlans[i];
++				unsigned int low_4_index;
++
++				if (!vlan->members)
++					continue;
++
++				++actual_vlans;
++				low_4_index = (unsigned int)i & 0xf;
++				if (!vlans_low_4[low_4_index]) {
++					vlans_low_4[low_4_index] = i;
++				} else {
++					pr_err("VLAN ID tag %d has the same lower 4 bits as VLAN ID tag %d\n", i, vlans_low_4[low_4_index]);
++				}
++			}
++			if (actual_vlans > BCM5325_ACTUAL_VLAN_SIZE) {
++				pr_err("VLAN ID tags are more than actual limit of %d", BCM5325_ACTUAL_VLAN_SIZE);
++			}
++		}
++
+ 		for (i = 0; i < dev->sw_dev.vlans; i++) {
+ 			struct b53_vlan *vlan = &dev->vlans[i];
+ 
+@@ -779,8 +808,8 @@ static int b53_port_set_pvid(struct switch_dev *dev, int port, int val)
+ {
+ 	struct b53_device *priv = sw_to_b53(dev);
+ 
+-	if (val > 15 && is5325(priv))
+-		return -EINVAL;
++	/*if (val > 15 && is5325(priv))
++		return -EINVAL;*/
+ 	if (val == 4095 && !priv->allow_vid_4095)
+ 		return -EINVAL;
+ 
+@@ -1299,7 +1328,7 @@ static const struct b53_chip_data b53_switch_chips[] = {
+ 		.chip_id = BCM5325_DEVICE_ID,
+ 		.dev_name = "BCM5325",
+ 		.alias = "bcm5325",
+-		.vlans = 16,
++		.vlans = 4096,
+ 		.enabled_ports = 0x1f,
+ 		.cpu_port = B53_CPU_PORT_25,
+ 		.duplex_reg = B53_DUPLEX_STAT_FE,
+
