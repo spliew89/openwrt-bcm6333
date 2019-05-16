@@ -1,0 +1,77 @@
+--- a/drivers/net/ethernet/broadcom/bcm63xx_enet.c
++++ b/drivers/net/ethernet/broadcom/bcm63xx_enet.c
+@@ -35,6 +35,8 @@
+ #include <bcm63xx_dev_enet.h>
+ #include "bcm63xx_enet.h"
+ 
++#include <linux/of_mdio.h>
++
+ static char bcm_enet_driver_name[] = "bcm63xx_enet";
+ static char bcm_enet_driver_version[] = "1.0";
+ 
+@@ -1818,32 +1820,39 @@ static int bcm_enet_probe(struct platform_device *pdev)
+ 		struct phy_device *phydev;
+ 		char phy_id[MII_BUS_ID_SIZE + 3];
+ 
+-		priv->mii_bus = mdiobus_alloc();
+-		if (!priv->mii_bus) {
+-			ret = -ENOMEM;
+-			goto out_unregister_netdev;
+-		}
++		struct device_node *np = of_find_compatible_node(NULL, NULL, "virtual,mdio-gpio");
++		
++		if (np) {
++			priv->mii_bus = of_mdio_find_bus(np);
++			priv->phy_id = 0;
++		} else {
++			priv->mii_bus = mdiobus_alloc();
++			if (!priv->mii_bus) {
++				ret = -ENOMEM;
++				goto out_unregister_netdev;
++			}
+ 
+-		bus = priv->mii_bus;
+-		bus->name = "bcm63xx_enet MII bus";
+-		bus->parent = &pdev->dev;
+-		bus->priv = priv;
+-		bus->read = bcm_enet_mdio_read_phylib;
+-		bus->write = bcm_enet_mdio_write_phylib;
+-		sprintf(bus->id, "%s-%d", pdev->name, pdev->id);
+-
+-		/* only probe bus where we think the PHY is, because
+-		 * the mdio read operation return 0 instead of 0xffff
+-		 * if a slave is not present on hw */
+-		bus->phy_mask = ~(1 << priv->phy_id);
+-
+-		if (priv->has_phy_interrupt)
+-			bus->irq[priv->phy_id] = priv->phy_interrupt;
+-
+-		ret = mdiobus_register(bus);
+-		if (ret) {
+-			dev_err(&pdev->dev, "unable to register mdio bus\n");
+-			goto out_free_mdio;
++			bus = priv->mii_bus;
++			bus->name = "bcm63xx_enet MII bus";
++			bus->parent = &pdev->dev;
++			bus->priv = priv;
++			bus->read = bcm_enet_mdio_read_phylib;
++			bus->write = bcm_enet_mdio_write_phylib;
++			sprintf(bus->id, "%s-%d", pdev->name, pdev->id);
++
++			/* only probe bus where we think the PHY is, because
++			* the mdio read operation return 0 instead of 0xffff
++			* if a slave is not present on hw */
++			bus->phy_mask = ~(1 << priv->phy_id);
++
++			if (priv->has_phy_interrupt)
++				bus->irq[priv->phy_id] = priv->phy_interrupt;
++
++			ret = mdiobus_register(bus);
++			if (ret) {
++				dev_err(&pdev->dev, "unable to register mdio bus\n");
++				goto out_free_mdio;
++			}
+ 		}
+ 
+ 		/* connect to PHY */
+
