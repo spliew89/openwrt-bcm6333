@@ -74,6 +74,15 @@ define Device/96328avng-generic
 endef
 TARGET_DEVICES += 96328avng-generic
 
+define Device/96333AW2G-generic
+  $(Device/bcm63xx)
+  DEVICE_TITLE := Generic 96333AW2G
+  DEVICE_DTS := bcm96333AW2G
+  CFE_BOARD_ID := 96333AW2G
+  CFE_CHIP_ID := 6338
+endef
+TARGET_DEVICES += 96333AW2G-generic
+
 define Device/96338GW-generic
   $(Device/bcm63xx)
   DEVICE_TITLE := Generic 96338GW

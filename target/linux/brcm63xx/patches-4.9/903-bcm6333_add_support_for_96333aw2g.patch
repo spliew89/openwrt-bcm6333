@@ -1,0 +1,55 @@
+--- a/arch/mips/bcm63xx/boards/board_bcm963xx.c
++++ b/arch/mips/bcm63xx/boards/board_bcm963xx.c
+@@ -797,6 +797,23 @@ static struct board_info __initdata board_R5010UNV2 = {
+ 
+ #endif /* CONFIG_BCM63XX_CPU_6328 */
+ 
++/*
++ * known 6333 boards
++ */
++#ifdef CONFIG_BCM63XX_CPU_6338
++static struct board_info __initdata board_96333aw2g = {
++	.name				= "96333AW2G",
++	.expected_cpu_id		= 0x6338,
++
++	.has_enet0			= 1,
++	.enet0 = {
++		.has_phy		= 1,
++		.use_internal_phy	= 1,
++	},
++};
++
++#endif /* CONFIG_BCM63XX_CPU_6333 */
++
+ /*
+  * known 6338 boards
+  */
+@@ -2671,6 +2688,7 @@ static const struct board_info __initconst *bcm963xx_boards[] = {
+ 	&board_R5010UNV2,
+ #endif
+ #ifdef CONFIG_BCM63XX_CPU_6338
++	&board_96333aw2g,
+ 	&board_96338gw,
+ 	&board_96338w,
+ 	&board_96338w2_e7t,
+@@ -2778,6 +2796,7 @@ static struct of_device_id const bcm963xx_boards_dt[] = {
+ 	{ .compatible = "sercomm,ad1018-nor", .data = &board_AD1018, },
+ #endif
+ #ifdef CONFIG_BCM63XX_CPU_6338
++	{ .compatible = "brcm,bcm96333aw2g", .data = &board_96333aw2g, },
+ 	{ .compatible = "brcm,bcm96338gw", .data = &board_96338gw, },
+ 	{ .compatible = "brcm,bcm96338w", .data = &board_96338w, },
+ 	{ .compatible = "dynalink,rta1320", .data = &board_rta1320_16m, },
+--- a/arch/mips/bcm63xx/dev-flash.c
++++ b/arch/mips/bcm63xx/dev-flash.c
+@@ -126,6 +126,9 @@ static int __init bcm63xx_detect_flash_type(void)
+ 		else
+ 			return BCM63XX_FLASH_TYPE_NAND;
+ 	case BCM6338_CPU_ID:
++		if(strcmp(board_get_name(), "96333AW2G")) {
++			return BCM63XX_FLASH_TYPE_SERIAL;
++		}
+ 	case BCM6345_CPU_ID:
+ 	case BCM6348_CPU_ID:
+ 		/* no way to auto detect so assume parallel */
+

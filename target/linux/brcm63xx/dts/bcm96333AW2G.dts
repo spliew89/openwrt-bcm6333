@@ -1,0 +1,93 @@
+/dts-v1/;
+
+#include "bcm6338.dtsi"
+
+#include <dt-bindings/input/input.h>
+
+/ {
+	model = "Broadcom BCM96333AW2G reference board";
+	compatible = "brcm,bcm96333aw2g", "brcm,bcm6338";
+
+	chosen {
+		bootargs = "rootfstype=squashfs,jffs2 noinitrd console=ttyS0,115200";
+		stdout-path = "serial0:115200n8";
+	};
+
+	gpio-leds {
+		compatible = "gpio-leds";
+		
+		internet_green {
+			label = "96333AW2G:green:internet";
+			gpios = <&gpio0 0 1>;
+		};
+		power_green {
+			label = "96333AW2G:green:power";
+			gpios = <&gpio0 1 1>;
+			default-state = "on";
+		};	
+		internet_red {
+			label = "96333AW2G:red:internet";
+			gpios = <&gpio0 2 1>;
+		};
+	};
+
+	aliases {
+		mdio-gpio0 = &mdio0;
+	};
+
+	mdio0: mdio {
+		compatible = "virtual,mdio-gpio";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		gpios = <&gpio0 3 0 &gpio0 4 0>;
+		
+		phy@0 {
+			reg = <0>;
+			ports {
+				port0 {
+					reg = <0>;
+					label = "wan";
+				};
+				port1 {
+					reg = <1>;
+					label = "lan1";
+				};
+				port2 {
+					reg = <2>;
+					label = "lan2";
+				};
+				port3 {
+					reg = <3>;
+					label = "lan3";
+				};
+				port4 {
+					reg = <4>;
+					label = "cpu";
+				};
+			};
+		};
+	};
+};
+
+&lsspi {
+	status = "ok";
+
+	flash@0 {
+		compatible = "jedec,spi-nor";
+		spi-max-frequency = <781000>;
+		reg = <0>;
+
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		linux,part-probe = "bcm63xxpart";
+
+		partitions {
+			compatible = "brcm,bcm963xx-cfe-nor-partitions";
+		};
+	};
+};
+
+&uart0 {
+	status = "ok";
+};
