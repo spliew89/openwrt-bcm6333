@@ -1,0 +1,37 @@
+--- a/drivers/mtd/spi-nor/spi-nor.c
++++ b/drivers/mtd/spi-nor/spi-nor.c
+@@ -1332,10 +1332,9 @@ sst_write_err:
+  * FLASH_PAGESIZE chunks.  The address range may be any size provided
+  * it is within the physical boundaries.
+  */
+-static int spi_nor_write(struct mtd_info *mtd, loff_t to, size_t len,
++static int __spi_nor_write(struct spi_nor *nor, loff_t to, size_t len,
+ 	size_t *retlen, const u_char *buf)
+ {
+-	struct spi_nor *nor = mtd_to_spi_nor(mtd);
+ 	size_t page_offset, page_remain, i;
+ 	ssize_t ret;
+ 
+@@ -1396,6 +1395,21 @@ write_err:
+ 	return ret;
+ }
+ 
++static int spi_nor_write(struct mtd_info *mtd, loff_t to, size_t len,
++	size_t *retlen, const u_char *buf)
++{
++	struct spi_nor *nor = mtd_to_spi_nor(mtd);
++	const size_t write_len = 58;
++	size_t off = 0;
++	int ret = 0;
++
++	for (; (off < len) && (ret == 0); off += write_len) {
++		ret = __spi_nor_write(nor, to + off, min(len - off, write_len), retlen, buf + off);
++	}
++
++	return ret;
++}
++
+ static int macronix_quad_enable(struct spi_nor *nor)
+ {
+ 	int ret, val;
+
