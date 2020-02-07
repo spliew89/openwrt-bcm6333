@@ -70,7 +70,7 @@ Signed-off-by: Russell King <rmk+kernel@armlinux.org.uk>
  
 +	priv = devm_kzalloc(&phydev->mdio.dev, sizeof(*priv), GFP_KERNEL);
 +	if (!priv)
-+	return -ENOMEM;
++		return -ENOMEM;
 +
 +	dev_set_drvdata(&phydev->mdio.dev, priv);
 +

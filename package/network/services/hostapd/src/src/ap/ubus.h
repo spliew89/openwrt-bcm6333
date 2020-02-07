@@ -18,7 +18,8 @@ enum hostapd_ubus_event_type {
 struct hostapd_ubus_request {
 	enum hostapd_ubus_event_type type;
 	const struct ieee80211_mgmt *mgmt_frame;
-	const struct hostapd_frame_info *frame_info;
+	const struct ieee802_11_elems *elems;
+	int ssi_signal; /* dBm */
 	const u8 *addr;
 };
 
