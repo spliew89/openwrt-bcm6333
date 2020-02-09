@@ -33,6 +33,9 @@ brcm63xx_dt_detect() {
 	"Belkin F5D7633")
 		board_name="f5d7633"
 		;;
+	"Broadcom BCM96333AW2G reference board")
+		board_name="bcm96333aw2g"
+		;;
 	"Broadcom 96348R reference board")
 		board_name="bcm96348r"
 		;;

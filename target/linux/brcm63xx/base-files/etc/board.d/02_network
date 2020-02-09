@@ -19,6 +19,11 @@ spw500v)
 	ucidef_set_interface_lan "eth0"
 	;;
 
+bcm96333aw2g)
+	ucidef_add_switch "switch0" \
+		"0:lan" "1:lan" "2:lan" "3:lan" "4t@eth0"
+	;;
+
 ar1004g |\
 bcm96338gw |\
 bcm96338w |\
