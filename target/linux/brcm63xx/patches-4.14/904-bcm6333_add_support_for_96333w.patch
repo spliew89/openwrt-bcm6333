@@ -1,0 +1,46 @@
+--- a/arch/mips/bcm63xx/boards/board_bcm963xx.c
++++ b/arch/mips/bcm63xx/boards/board_bcm963xx.c
+@@ -812,6 +812,16 @@ static struct board_info __initdata board_96333aw2g = {
+ 	},
+ };
+ 
++static struct board_info __initdata board_96333w = {
++	.name				= "96333W",
++	.expected_cpu_id		= 0x6338,
++
++	.has_enet0			= 1,
++	.enet0 = {
++		.has_phy		= 1,
++		.use_internal_phy	= 1,
++	},
++};
+ #endif /* CONFIG_BCM63XX_CPU_6333 */
+ 
+ /*
+@@ -2744,6 +2754,7 @@ static const struct board_info __initconst *bcm963xx_boards[] = {
+ #endif
+ #ifdef CONFIG_BCM63XX_CPU_6338
+ 	&board_96333aw2g,
++	&board_96333w,
+ 	&board_96338gw,
+ 	&board_96338w,
+ 	&board_96338w2_e7t,
+@@ -2853,6 +2864,7 @@ static struct of_device_id const bcm963xx_boards_dt[] = {
+ #endif
+ #ifdef CONFIG_BCM63XX_CPU_6338
+ 	{ .compatible = "brcm,bcm96333aw2g", .data = &board_96333aw2g, },
++	{ .compatible = "brcm,bcm96333w", .data = &board_96333w, },
+ 	{ .compatible = "brcm,bcm96338gw", .data = &board_96338gw, },
+ 	{ .compatible = "brcm,bcm96338w", .data = &board_96338w, },
+ 	{ .compatible = "dynalink,rta1320", .data = &board_rta1320_16m, },
+--- a/arch/mips/bcm63xx/dev-flash.c
++++ b/arch/mips/bcm63xx/dev-flash.c
+@@ -126,7 +126,7 @@ static int __init bcm63xx_detect_flash_type(void)
+ 		else
+ 			return BCM63XX_FLASH_TYPE_NAND;
+ 	case BCM6338_CPU_ID:
+-		if (strcmp(board_get_name(), "96333AW2G")) {
++		if (strcmp(board_get_name(), "96333AW2G") || strcmp(board_get_name(), "96333W")) {
+ 			return BCM63XX_FLASH_TYPE_SERIAL;
+ 		}
+ 	case BCM6345_CPU_ID:
