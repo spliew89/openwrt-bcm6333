@@ -32,7 +32,7 @@ endef
 # UBNT_BOARD e.g. one of (XS2, XS5, RS, XM)
 # UBNT_TYPE e.g. one of (BZ, XM, XW)
 # UBNT_CHIP e.g. one of (ar7240, ar933x, ar934x)
-# UBNT_VERSION e.g. one of (6.0.0, 8.5.0)
+# UBNT_VERSION e.g. one of (6.0.0, 8.5.3)
 define Device/ubnt
   DEVICE_PACKAGES := kmod-usb-core kmod-usb2
   IMAGE_SIZE := 7552k
@@ -64,7 +64,7 @@ define Device/ubnt-wa
   UBNT_TYPE := WA
   UBNT_CHIP := ar934x
   UBNT_BOARD := WA
-  UBNT_VERSION := 8.5.0
+  UBNT_VERSION := 8.5.3
   ATH_SOC := ar9342
 endef
 
@@ -101,6 +101,14 @@ define Device/ubnt_bullet-m-xw
 endef
 TARGET_DEVICES += ubnt_bullet-m-xw
 
+define Device/ubnt_picostation-m
+  $(Device/ubnt-xm)
+  DEVICE_TITLE := Ubiquiti Picostation M
+  DEVICE_PACKAGES += rssileds
+  SUPPORTED_DEVICES += bullet-m
+endef
+TARGET_DEVICES += ubnt_picostation-m
+
 define Device/ubnt_rocket-m
   $(Device/ubnt-xm)
   DEVICE_TITLE := Ubiquiti Rocket-M
@@ -108,6 +116,22 @@ define Device/ubnt_rocket-m
   SUPPORTED_DEVICES += rocket-m
 endef
 TARGET_DEVICES += ubnt_rocket-m
+
+define Device/ubnt_nanostation-loco-m
+  $(Device/ubnt-xm)
+  DEVICE_TITLE := Ubiquiti Nanostation Loco M
+  DEVICE_PACKAGES += rssileds
+  SUPPORTED_DEVICES += bullet-m
+endef
+TARGET_DEVICES += ubnt_nanostation-loco-m
+
+define Device/ubnt_nanostation-loco-m-xw
+  $(Device/ubnt-xw)
+  DEVICE_TITLE := Ubiquiti Nanostation Loco M (XW)
+  DEVICE_PACKAGES += rssileds
+  SUPPORTED_DEVICES += loco-m-xw
+endef
+TARGET_DEVICES += ubnt_nanostation-loco-m-xw
 
 define Device/ubnt_nanostation-m
   $(Device/ubnt-xm)

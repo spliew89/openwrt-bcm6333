@@ -22,9 +22,6 @@
 		compatible = "gpio-keys-polled";
 		poll-interval = <20>;
 
-		pinctrl-names = "default";
-		pinctrl-0 = <&jtag_disable_pins>;
-
 		reset {
 			label = "Reset";
 			linux,code = <KEY_RESTART>;
@@ -35,6 +32,7 @@
 		rfkill {
 			label = "WiFi";
 			linux,code = <KEY_RFKILL>;
+			linux,input-type = <EV_SW>;
 			gpios = <&gpio 16 GPIO_ACTIVE_HIGH>;
 			debounce-interval = <60>;
 		};
@@ -96,7 +94,14 @@
 };
 
 &gpio {
-	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&jtag_disable_pins &pmx_usb_power>;
+};
+
+&pinmux {
+	pmx_usb_power: usb_power {
+		pinctrl-single,bits = <0x4 0x0 0xff>;
+	};
 };
 
 &spi {

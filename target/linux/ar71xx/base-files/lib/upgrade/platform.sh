@@ -217,6 +217,7 @@ platform_check_image() {
 	archer-c60-v2|\
 	archer-c7-v4|\
 	archer-c7-v5|\
+	arduino-yun|\
 	bullet-m|\
 	bullet-m-xw|\
 	c-55|\
@@ -346,7 +347,6 @@ platform_check_image() {
 	ap152|\
 	ap91-5g|\
 	ap96|\
-	arduino-yun|\
 	bhr-4grv2|\
 	bxu2000n-2-a1|\
 	db120|\
@@ -773,8 +773,13 @@ platform_nand_pre_upgrade() {
 		local fw_mtd=$(find_mtd_part kernel)
 		fw_mtd="${fw_mtd/block/}"
 		[ -n "$fw_mtd" ] || return
+
+		local board_dir=$(tar tf "$1" | grep -m 1 '^sysupgrade-.*/$')
+		board_dir=${board_dir%/}
+		[ -n "$board_dir" ] || return
+
 		mtd erase kernel
-		tar xf "$1" sysupgrade-routerboard/kernel -O | nandwrite -o "$fw_mtd" -
+		tar xf "$1" ${board_dir}/kernel -O | nandwrite -o "$fw_mtd" -
 		;;
 	wi2a-ac200i)
 		case "$(fw_printenv -n dualPartition)" in
