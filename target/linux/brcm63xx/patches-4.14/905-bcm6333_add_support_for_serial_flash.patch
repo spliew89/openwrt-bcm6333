@@ -1,0 +1,10 @@
+--- a/arch/mips/bcm63xx/dev-flash.c
++++ b/arch/mips/bcm63xx/dev-flash.c
+@@ -126,6 +126,7 @@ static int __init bcm63xx_detect_flash_type(void)
+ 		else
+ 			return BCM63XX_FLASH_TYPE_NAND;
+ 	case BCM6338_CPU_ID:
++		return BCM63XX_FLASH_TYPE_SERIAL;
+ 	case BCM6345_CPU_ID:
+ 	case BCM6348_CPU_ID:
+ 		/* no way to auto detect so assume parallel */
