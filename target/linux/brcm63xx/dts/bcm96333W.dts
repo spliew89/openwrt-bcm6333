@@ -13,6 +13,28 @@
 		stdout-path = "serial0:115200n8";
 	};
 
+	keys {
+		compatible = "gpio-keys-polled";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		poll-interval = <20>;
+
+		reset {
+			label = "reset";
+			gpios = <&pinctrl 0 1>;
+			linux,code = <KEY_RESET_BUTTON>;
+			debounce-interval = <60>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		
+		power_red {
+			label = "96333W:red:power";
+			gpios = <&gpio0 1 1>;
+		};
+	};
 
 	aliases {
 		mdio-gpio0 = &mdio0;
