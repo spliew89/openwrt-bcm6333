@@ -1,0 +1,67 @@
+--- a/drivers/net/ethernet/broadcom/bcm63xx_enet.c
++++ b/drivers/net/ethernet/broadcom/bcm63xx_enet.c
+@@ -432,9 +432,11 @@ static int bcm_enet_tx_reclaim(struct net_device *dev, int force)
+ {
+ 	struct bcm_enet_priv *priv;
+ 	int released;
++	int bytes;
+ 
+ 	priv = netdev_priv(dev);
+ 	released = 0;
++	bytes = 0;
+ 
+ 	while (priv->tx_desc_count < priv->tx_ring_size) {
+ 		struct bcm_enet_desc *desc;
+@@ -470,10 +472,13 @@ static int bcm_enet_tx_reclaim(struct net_device *dev, int force)
+ 		if (desc->len_stat & DMADESC_UNDER_MASK)
+ 			dev->stats.tx_errors++;
+ 
++		bytes += skb->len;
+ 		dev_kfree_skb(skb);
+ 		released++;
+ 	}
+ 
++	netdev_completed_queue(dev, released, bytes);
++
+ 	if (netif_queue_stopped(dev) && released)
+ 		netif_wake_queue(dev);
+ 
+@@ -640,14 +645,17 @@ bcm_enet_start_xmit(struct sk_buff *skb, struct net_device *dev)
+ 	desc->len_stat = len_stat;
+ 	wmb();
+ 
+-	/* kick tx dma */
+-	enet_dmac_writel(priv, priv->dma_chan_en_mask,
+-				 ENETDMAC_CHANCFG, priv->tx_chan);
++	netdev_sent_queue(dev, skb->len);
+ 
+ 	/* stop queue if no more desc available */
+ 	if (!priv->tx_desc_count)
+ 		netif_stop_queue(dev);
+ 
++	/* kick tx dma */
++	if (!skb->xmit_more || !priv->tx_desc_count)
++		enet_dmac_writel(priv, priv->dma_chan_en_mask,
++					ENETDMAC_CHANCFG, priv->tx_chan);
++
+ 	dev->stats.tx_bytes += skb->len;
+ 	dev->stats.tx_packets++;
+ 	ret = NETDEV_TX_OK;
+@@ -1060,6 +1068,8 @@ static int bcm_enet_open(struct net_device *dev)
+ 	else
+ 		bcm_enet_adjust_link(dev);
+ 
++	netdev_reset_queue(dev);
++
+ 	netif_start_queue(dev);
+ 	return 0;
+ 
+@@ -2304,6 +2314,8 @@ static int bcm_enetsw_open(struct net_device *dev)
+ 	enet_dmac_writel(priv, ENETDMAC_IR_PKTDONE_MASK,
+ 			 ENETDMAC_IRMASK, priv->tx_chan);
+ 
++	netdev_reset_queue(dev);
++
+ 	netif_carrier_on(dev);
+ 	netif_start_queue(dev);
+ 
