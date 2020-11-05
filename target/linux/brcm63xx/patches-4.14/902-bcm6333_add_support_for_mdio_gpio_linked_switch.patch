@@ -9,7 +9,16 @@
  static char bcm_enet_driver_name[] = "bcm63xx_enet";
  static char bcm_enet_driver_version[] = "1.0";
  
-@@ -1805,32 +1807,39 @@ static int bcm_enet_probe(struct platform_device *pdev)
+@@ -1671,6 +1673,8 @@ static const struct net_device_ops bcm_enet_ops = {
+ 	.ndo_change_mtu		= bcm_enet_change_mtu,
+ };
+ 
++#define B53_PSEUDO_PHY	0x1e /* Register Access Pseudo PHY */
++
+ /*
+  * allocate netdevice, request register memory and register device.
+  */
+@@ -1805,32 +1809,39 @@ static int bcm_enet_probe(struct platform_device *pdev)
  		struct phy_device *phydev;
  		char phy_id[MII_BUS_ID_SIZE + 3];
  
@@ -22,7 +31,7 @@
 +		
 +		if (np) {
 +			priv->mii_bus = of_mdio_find_bus(np);
-+			priv->phy_id = 0;
++			priv->phy_id = B53_PSEUDO_PHY;
 +		} else {
 +			priv->mii_bus = mdiobus_alloc();
 +			if (!priv->mii_bus) {

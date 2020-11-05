@@ -46,26 +46,26 @@
 		#size-cells = <0>;
 		gpios = <&gpio0 3 0 &gpio0 4 0>;
 		
-		phy@0 {
-			reg = <0>;
+		phy0: ethernet-switch@30 {
+			reg = <30>;
 			ports {
-				port0 {
+				port@0 {
 					reg = <0>;
 					label = "wan";
 				};
-				port1 {
+				port@1 {
 					reg = <1>;
 					label = "lan1";
 				};
-				port2 {
+				port@2 {
 					reg = <2>;
 					label = "lan2";
 				};
-				port3 {
+				port@3 {
 					reg = <3>;
 					label = "lan3";
 				};
-				port4 {
+				port@4 {
 					reg = <4>;
 					label = "cpu";
 				};
