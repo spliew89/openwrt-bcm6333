@@ -11,22 +11,19 @@ include $(INCLUDE_DIR)/image.mk
 LOADADDR = 0x80010000		# RAM start + 64K
 KERNEL_ENTRY = $(LOADADDR)	# Newer kernels add a jmp to the kernel_entry at the start of the binary
 LOADER_ENTRY = 0x80a00000	# RAM start + 10M, for relocate
-RAMSIZE = 0x02000000		# 32MB
-LZMA_TEXT_START = 0x81800000	# 32MB - 8MB
+RAMSIZE = 0x01000000		# 16MB
 
 LOADER_MAKEOPTS= \
 		KDIR=$(KDIR) \
 		LOADADDR=$(LOADADDR) \
 		KERNEL_ENTRY=$(KERNEL_ENTRY) \
 		RAMSIZE=$(RAMSIZE) \
-		LZMA_TEXT_START=$(LZMA_TEXT_START) \
-
+		
 RELOCATE_MAKEOPTS= \
 		CACHELINE_SIZE=16 \
 		KERNEL_ADDR=$(KERNEL_ENTRY) \
 		CROSS_COMPILE=$(TARGET_CROSS) \
-		LZMA_TEXT_START=$(LOADER_ENTRY)
-
+		
 define Build/Compile
 	rm -rf $(KDIR)/relocate
 	$(CP) ../../generic/image/relocate $(KDIR)
